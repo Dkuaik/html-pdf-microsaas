@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  html-pdf:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.html-pdf.rule=Host(`html-pdf.dkuaik.dev`)"
+      - "traefik.http.routers.html-pdf.entrypoints=websecure"
+      - "traefik.http.routers.html-pdf.tls.certresolver=letsencrypt"
+      - "traefik.http.services.html-pdf.loadbalancer.server.port=8000"
+      - "traefik.docker.network=proxy"
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true
