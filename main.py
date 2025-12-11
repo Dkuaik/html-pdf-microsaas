@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Body
 from fastapi.responses import FileResponse
 import tempfile
 import os
@@ -11,15 +11,15 @@ logging.basicConfig(level=logging.INFO)
 app = FastAPI(title="HTML to PDF Micro SaaS", description="Convert HTML to PDF using FastAPI")
 
 @app.post("/html2pdf")
-async def convert_html_to_pdf(html: str = Query(...)):
+async def convert_html_to_pdf(body: str = Body(...), title: str = Query("output")):
     """
     Convert HTML string to PDF
     """
-    logging.info(f"Received HTML length: {len(html)}")
+    logging.info(f"Received HTML length: {len(body)}")
     try:
         # Generate PDF directly from HTML string
         logging.info("Generating PDF...")
-        pdf_bytes = HTML(string=html).write_pdf()
+        pdf_bytes = HTML(string=body).write_pdf()
         
         # Write bytes to temporary file
         with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp_pdf:
@@ -29,7 +29,8 @@ async def convert_html_to_pdf(html: str = Query(...)):
         logging.info(f"PDF generated at {pdf_path}")
 
         # Return PDF file
-        return FileResponse(pdf_path, media_type='application/pdf', filename='converted.pdf')
+        filename = f"{title}.pdf" if title else "output.pdf"
+        return FileResponse(pdf_path, media_type='application/pdf', filename=filename)
 
     except Exception as e:
         logging.error(f"Error: {str(e)}")
