@@ -79,12 +79,11 @@ HTML_CONTENT = """<!DOCTYPE html>
 def test_html2pdf():
     """Test the HTML to PDF conversion endpoint"""
     print("Testing HTML to PDF conversion...")
-    
-    # Send POST request with HTML in request body
+
+    # Send POST request with title and HTML in request body
     response = requests.post(
         f"{BASE_URL}/html2pdf",
-        params={"title": "test_output"},
-        json={"body": HTML_CONTENT}
+        json={"title": "test_output", "html": HTML_CONTENT}
     )
     
     if response.status_code == 200:

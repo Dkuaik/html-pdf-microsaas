@@ -1,5 +1,6 @@
-from fastapi import FastAPI, HTTPException, Query, Body
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 import tempfile
 import os
 from weasyprint import HTML
@@ -10,22 +11,28 @@ logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(title="HTML to PDF Micro SaaS", description="Convert HTML to PDF using FastAPI")
 
+class PDFRequest(BaseModel):
+    title: str
+    html: str
+
 @app.post("/html2pdf")
-async def convert_html_to_pdf(body: str = Body(...), title: str = Query("output")):
+async def convert_html_to_pdf(request: PDFRequest):
     """
     Convert HTML string to PDF
     """
-    logging.info(f"Received HTML length: {len(body)}")
+    html = request.html
+    title = request.title
+    logging.info(f"Received HTML length: {len(html)}")
     try:
         # Generate PDF directly from HTML string
         logging.info("Generating PDF...")
-        pdf_bytes = HTML(string=body).write_pdf()
-        
+        pdf_bytes = HTML(string=html).write_pdf()
+
         # Write bytes to temporary file
         with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as temp_pdf:
             temp_pdf.write(pdf_bytes)
             pdf_path = temp_pdf.name
-        
+
         logging.info(f"PDF generated at {pdf_path}")
 
         # Return PDF file
